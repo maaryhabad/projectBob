@@ -23,17 +23,30 @@ class GameScene: SKScene {
     var velocityX: CGFloat = 0.0
     var velocityY: CGFloat = 0.0
     
- 
+    var label: SKNode!
     
+    let cam = SKCameraNode()
+    
+    var joystickContainer: SKNode!
+ 
     override func didMove(to view: SKView) {
         
-        guard let joystickContainer = childNode(withName: "joystick") else {
-            print("Joystick container not found")
-            return
-        }
+        joystickContainer = childNode(withName: "joystick")
+        
+        let borderBody = SKPhysicsBody(edgeLoopFrom: self.frame)
+        borderBody.friction = 0
+        self.physicsBody = borderBody
+        
+        
+        label = InteractiveLabelNode(with: "esse é um teste")
+        label.position = CGPoint(x: -750, y: 530)
+        self.camera = cam
+
+        self.addChild(label)
         player = childNode(withName: "player") as! SKSpriteNode
         base = joystickContainer.childNode(withName: "arrow") as! SKSpriteNode
         ball = joystickContainer.childNode(withName: "knob") as! SKSpriteNode
+        createBackground()
         
     }
     
@@ -135,12 +148,31 @@ class GameScene: SKScene {
         self.player.position.y += velocityY * 0.1
         
         if velocityX < 0 {
-            player.xScale = -5
-            player.yScale = 5
+            player.xScale = 8
+            player.yScale = 8
         }  else {
-            player.xScale = 5
-            player.yScale = 5
+            player.xScale = -8
+            player.yScale = 8
         }
+        cam.position.x = player.position.x
+        joystickContainer.position = CGPoint(x: cam.position.x - 300, y: cam.position.y - 100)
+    }
+    
+    func createBackground() {
+        var backgroundTextures: [SKTexture] = []
         
+        for i in 0 ... 4 {
+            let texture = SKTexture(imageNamed: "background\(i)")
+            backgroundTextures.append(texture)
+        }
+        print(backgroundTextures)
+        var selectedBackground = backgroundTextures.randomElement()
+        for i in 0 ... 1 {
+            let background = SKSpriteNode(texture: selectedBackground)
+            background.zPosition = -10
+            background.anchorPoint = CGPoint.zero
+            background.position = CGPoint(x: (selectedBackground?.size().width)! * CGFloat(i) - CGFloat(i), y: 100)
+            addChild(background)
+        }
     }
 }
