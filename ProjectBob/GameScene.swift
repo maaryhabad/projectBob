@@ -28,7 +28,13 @@ class GameScene: SKScene {
     let cam = SKCameraNode()
     
     var joystickContainer: SKNode!
+    var backgroundNode: SKSpriteNode!
+    
+    var currentBackgroundNode: SKSpriteNode!
+    var nextBackgroundNode: SKSpriteNode!
  
+    var lastUpdate: TimeInterval!
+    
     override func didMove(to view: SKView) {
         
         joystickContainer = childNode(withName: "joystick")
@@ -46,133 +52,185 @@ class GameScene: SKScene {
         player = childNode(withName: "player") as! SKSpriteNode
         base = joystickContainer.childNode(withName: "arrow") as! SKSpriteNode
         ball = joystickContainer.childNode(withName: "knob") as! SKSpriteNode
+        
+        self.backgroundNode = SKSpriteNode()
+        player.yScale =  8
+        player.position =  .zero
+        self.addChild(backgroundNode)
         createBackground()
         
-    }
-    
-    
-    func touchDown(atPoint pos : CGPoint) {
-        
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-       
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            let location = t.location(in: self)
-            let locationPositionInBall = ball.parent!.convert(location, from: self)
-            print("location",locationPositionInBall)
-            print("frame", ball.frame)
-            if ball.frame.contains(locationPositionInBall) {
-                stickActive = true
-            } else {
-                stickActive = false
-            }
-        }
-
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            let location = t.location(in: self)
-            var angle: CGFloat = 0.0
-            self.touchMoved(toPoint: location)
-//            print(stickActive)
-            if stickActive == true {
-                if let joystickContainer = base.parent {
-                    
-                    let basePositionInScene = self.convert(base.position, from: joystickContainer)
-                    let v = CGVector(dx: location.x - basePositionInScene.x, dy: location.y - basePositionInScene.y)
-                    angle = atan2(v.dy, v.dx)
-                    
-                    var deg = angle * CGFloat(180/CGFloat(Double.pi))
-                    
-                    if deg < 0 {
-                        // Deg é negativo então somamos em +180 pra ter um offset ajustado da posição do  joystick
-                        deg = 180 + (180 + deg)
-                    }
-//                    print(deg)
-                    
-                    let distanceFromCenter: CGFloat = base.frame.size.height / 2
-                    
-                    
-//                    var offsetedAngle = angle
-//                    if offsetedAngle < 0 {
-//                        offsetedAngle = CGFloat.pi + (CGFloat.pi + angle )
-//                    }
-                    let xDist: CGFloat = sin(angle - 1.57079633) * distanceFromCenter
-                    let yDist: CGFloat = cos(angle - 1.57079633) * distanceFromCenter
-                    let locationPositionInBall = ball.parent!.convert(location, from: self)
-                    if (base.frame.contains(locationPositionInBall)) {
-                        ball.position = locationPositionInBall
-                    } else {
-                        ball.position = CGPoint(x: base.position.x - xDist, y: base.position.y + yDist)
-                    }
-                    
-                } else {
-                    print("Joystick container not found")
-                }
-                
-                velocityX = ball.position.x - base.position.x
-                velocityY = ball.position.y - base.position.y
-                
-//                player.zRotation = angle
-            }
-        }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if (stickActive == true) {
-            let move: SKAction = SKAction.move(to: base.position, duration: 0.2)
-            move.timingMode = .easeOut
-            ball.run(move)
-            velocityX = 0.0
-            velocityY = 0.0
-        }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
 //        velocityX = velocityX/2
-        self.player.position.x += velocityX * 0.05
-        self.player.position.y += velocityY * 0.1
+        
+        if lastUpdate == nil {
+            lastUpdate = currentTime
+            return
+        }
+        
+        let deltaTime = currentTime - lastUpdate
         
         if velocityX < 0 {
             player.xScale = 8
-            player.yScale = 8
         }  else {
             player.xScale = -8
-            player.yScale = 8
         }
-        cam.position.x = player.position.x
-        joystickContainer.position = CGPoint(x: cam.position.x - 300, y: cam.position.y - 100)
+        
+        lastUpdate = currentTime
+        
+        let distanceMoved = CGFloat(deltaTime) * self.velocityX * 10
+        
+        if (currentBackgroundNode.position.x - distanceMoved) <= 0 {
+            currentBackgroundNode.position.x -= distanceMoved
+            nextBackgroundNode.position.x -= distanceMoved
+            
+            if currentBackgroundNode.position.x <= -self.scene!.size.width {
+                self.updateBackground()
+            }
+        }
+    }
+    
+    func updateBackground() {
+        let pivot = self.currentBackgroundNode!
+        self.currentBackgroundNode = self.nextBackgroundNode
+        
+        
+        self.nextBackgroundNode = pivot
+        
+        self.nextBackgroundNode.texture = self.getRandomTexture()
+        
+        self.nextBackgroundNode.position.x = self.scene!.size.width
+        self.currentBackgroundNode.position.x = .zero
     }
     
     func createBackground() {
         var backgroundTextures: [SKTexture] = []
         
-        for i in 0 ... 4 {
+        for i in 1 ... 4 {
             let texture = SKTexture(imageNamed: "background\(i)")
             backgroundTextures.append(texture)
         }
+        
         print(backgroundTextures)
-        var selectedBackground = backgroundTextures.randomElement()
-        for i in 0 ... 1 {
-            let background = SKSpriteNode(texture: selectedBackground)
-            background.zPosition = -10
-            background.anchorPoint = CGPoint.zero
-            background.position = CGPoint(x: (selectedBackground?.size().width)! * CGFloat(i) - CGFloat(i), y: 100)
-            addChild(background)
-        }
+        
+        var selectedBackgroundTexture = backgroundTextures.randomElement()
+        var nextBackgroundTexture = backgroundTextures.filter { $0  != selectedBackgroundTexture } .randomElement()
+        
+        let selectedBackgroundNode =  SKSpriteNode(texture: selectedBackgroundTexture)
+        let nextBackgroundNode =  SKSpriteNode(texture: nextBackgroundTexture)
+     
+        selectedBackgroundNode.zPosition = -10
+        selectedBackgroundNode.scale(to: self.scene!.size)
+        selectedBackgroundNode.position = .zero
+        
+        nextBackgroundNode.zPosition = -10
+        nextBackgroundNode.scale(to: self.scene!.size)
+        nextBackgroundNode.position = CGPoint(x: self.scene!.size.width, y: 0)
+        
+        self.backgroundNode.addChild(selectedBackgroundNode)
+        self.backgroundNode.addChild(nextBackgroundNode)
+        
+        self.currentBackgroundNode  = selectedBackgroundNode
+        self.nextBackgroundNode =  nextBackgroundNode
     }
+    
+    func getRandomTexture() -> SKTexture {
+        
+        var backgroundTextures: [SKTexture] = []
+        
+        for i in 1 ... 4 {
+            let texture = SKTexture(imageNamed: "background\(i)")
+            backgroundTextures.append(texture)
+        }
+        return backgroundTextures.randomElement()!
+    }
+    
+
+        func touchDown(atPoint pos : CGPoint) {
+            
+        }
+        
+        func touchMoved(toPoint pos : CGPoint) {
+            
+        }
+        
+        func touchUp(atPoint pos : CGPoint) {
+           
+        }
+        
+        override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+            for t in touches {
+                let location = t.location(in: self)
+                let locationPositionInBall = ball.parent!.convert(location, from: self)
+                print("location",locationPositionInBall)
+                print("frame", ball.frame)
+                if ball.frame.contains(locationPositionInBall) {
+                    stickActive = true
+                } else {
+                    stickActive = false
+                }
+            }
+
+        }
+        
+        override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+            for t in touches {
+                let location = t.location(in: self)
+                var angle: CGFloat = 0.0
+                self.touchMoved(toPoint: location)
+    //            print(stickActive)
+                if stickActive == true {
+                    if let joystickContainer = base.parent {
+                        
+                        let basePositionInScene = self.convert(base.position, from: joystickContainer)
+                        let v = CGVector(dx: location.x - basePositionInScene.x, dy: location.y - basePositionInScene.y)
+                        angle = atan2(v.dy, v.dx)
+                        
+                        var deg = angle * CGFloat(180/CGFloat(Double.pi))
+                        
+                        if deg < 0 {
+                            // Deg é negativo então somamos em +180 pra ter um offset ajustado da posição do  joystick
+                            deg = 180 + (180 + deg)
+                        }
+    //                    print(deg)
+                        
+                        let distanceFromCenter: CGFloat = base.frame.size.height / 2
+                        
+                        
+    //                    var offsetedAngle = angle
+    //                    if offsetedAngle < 0 {
+    //                        offsetedAngle = CGFloat.pi + (CGFloat.pi + angle )
+    //                    }
+                        let xDist: CGFloat = sin(angle - 1.57079633) * distanceFromCenter
+                        let yDist: CGFloat = cos(angle - 1.57079633) * distanceFromCenter
+                        let locationPositionInBall = ball.parent!.convert(location, from: self)
+                        if (base.frame.contains(locationPositionInBall)) {
+                            ball.position = locationPositionInBall
+                        } else {
+                            ball.position = CGPoint(x: base.position.x - xDist, y: base.position.y + yDist)
+                        }
+                        
+                    } else {
+                        print("Joystick container not found")
+                    }
+                    
+                    velocityX = ball.position.x - base.position.x
+                    velocityY = ball.position.y - base.position.y
+                    
+    //                player.zRotation = angle
+                }
+            }
+        }
+        
+        override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+            if (stickActive == true) {
+                let move: SKAction = SKAction.move(to: base.position, duration: 0.2)
+                move.timingMode = .easeOut
+                ball.run(move)
+                velocityX = 0.0
+                velocityY = 0.0
+            }
+        }
 }
