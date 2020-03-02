@@ -23,7 +23,9 @@ class GameScene: SKScene {
     var velocityX: CGFloat = 0.0
     var velocityY: CGFloat = 0.0
     
+    var backLabel: SKNode!
     var label: SKNode!
+
     
     let cam = SKCameraNode()
     
@@ -35,20 +37,24 @@ class GameScene: SKScene {
  
     var lastUpdate: TimeInterval!
     
+    
+    
     override func didMove(to view: SKView) {
         
         joystickContainer = childNode(withName: "joystick")
+        backLabel = childNode(withName: "backLabel")
+        label = childNode(withName: "label")
         
         let borderBody = SKPhysicsBody(edgeLoopFrom: self.frame)
         borderBody.friction = 0
         self.physicsBody = borderBody
         
-        
-        label = InteractiveLabelNode(with: "esse é um teste")
-        label.position = CGPoint(x: -750, y: 530)
-        self.camera = cam
+        label = InteractiveLabelNode(with: "Olá, policial. Por favor, clique para inserir seu nome.")
+        label.position = CGPoint(x: -825, y: 500)
 
         self.addChild(label)
+//        backLabel.setValue(15, forKey: "cornerRadius")
+        
         player = childNode(withName: "player") as! SKSpriteNode
         base = joystickContainer.childNode(withName: "arrow") as! SKSpriteNode
         ball = joystickContainer.childNode(withName: "knob") as! SKSpriteNode
@@ -171,6 +177,22 @@ class GameScene: SKScene {
                 } else {
                     stickActive = false
                 }
+                
+                var alert = UIAlertController(title: "Nome do profissional", message: "", preferredStyle: .alert)
+                
+                alert.addTextField(configurationHandler: { (textField) -> Void in
+                    textField.text = "Escreva seu nome aqui"
+                })
+                
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (action) -> Void in
+                    let textField  = alert.textFields![0] as UITextField
+                    print("Nome do policial: \(textField.text)")
+                    self.label = InteractiveLabelNode(with: "")
+                    self.label = InteractiveLabelNode(with: "Oi! Eu sou o Bob, e junto com o \(textField.text) vamos conversar e jogar um pouco.")
+                }))
+                
+                self.view?.window?.rootViewController?.present(alert, animated: true, completion: nil)
+
             }
 
         }

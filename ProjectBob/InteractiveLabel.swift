@@ -18,7 +18,7 @@ class InteractiveLabelNode: SKNode {
       }
    }
    
-   var delayToShow: CGFloat = 0.3
+   var delayToShow: CGFloat = 0.05
    var lifeSpan: CGFloat = 1.0
    
    private var labels = [SKLabelNode]()
@@ -45,22 +45,39 @@ class InteractiveLabelNode: SKNode {
       
       if (text.count > 0) {
          var newX: CGFloat = 0.0
-         
+         var newY: CGFloat = 20.0
+        
          for char in text {
             let charAsString = String(char)
             if charAsString != " " {
-               let newCharNode = SKLabelNode(text: charAsString)
-               newCharNode.horizontalAlignmentMode = .left
-                
-               
-               newCharNode.position.x = newX
-               newCharNode.alpha = 0
-                newCharNode.fontColor = .black
-                
-               self.addChild(newCharNode)
-               labels.append(newCharNode)
-               
-               newX += newCharNode.frame.width
+                let newCharNode = SKLabelNode(text: charAsString)
+                if newX < 900 {
+                    newCharNode.horizontalAlignmentMode = .left
+                     
+                    
+                    newCharNode.position.x = newX
+                    newCharNode.alpha = 0
+                    newCharNode.fontColor = .black
+                     
+                    self.addChild(newCharNode)
+                    labels.append(newCharNode)
+                    
+                    newX += newCharNode.frame.width
+                } else {
+                    newCharNode.position.y -= newY
+                    print("y pos:", newY)
+                    newCharNode.horizontalAlignmentMode = .left
+                     
+                    newX = 0.0
+                    newCharNode.position.x = newX
+                    newCharNode.alpha = 0
+                    newCharNode.fontColor = .black
+                     
+                    self.addChild(newCharNode)
+                    labels.append(newCharNode)
+                    
+                    newX += newCharNode.frame.width
+                }
             } else {
                newX += 10
             }
@@ -76,7 +93,7 @@ class InteractiveLabelNode: SKNode {
             let delayAction = SKAction.wait(forDuration: TimeInterval(newDelay))
             newActions.append(delayAction)
          }
-         let fadeInAction = SKAction.fadeIn(withDuration: 0.1)
+         let fadeInAction = SKAction.fadeIn(withDuration: 0.00001)
          newActions.append(fadeInAction)
          let lifespanAction = SKAction.wait(forDuration: TimeInterval(lifeSpan))
          newActions.append(lifespanAction)

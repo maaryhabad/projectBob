@@ -17,6 +17,7 @@
 		CD48181323FD6D1600FC545B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CD48181123FD6D1600FC545B /* LaunchScreen.storyboard */; };
 		CD48181E23FD6D1700FC545B /* ProjectBobTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD48181D23FD6D1700FC545B /* ProjectBobTests.swift */; };
 		CD48182923FD6D1700FC545B /* ProjectBobUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD48182823FD6D1700FC545B /* ProjectBobUITests.swift */; };
+		CD59FDA5240C7321005B1A61 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD59FDA4240C7321005B1A61 /* Model.swift */; };
 		CDFC2F9124000017000C6D72 /* InteractiveLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDFC2F9024000017000C6D72 /* InteractiveLabel.swift */; };
 /* End PBXBuildFile section */
 
@@ -54,6 +55,7 @@
 		CD48182423FD6D1700FC545B /* ProjectBobUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProjectBobUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD48182823FD6D1700FC545B /* ProjectBobUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectBobUITests.swift; sourceTree = "<group>"; };
 		CD48182A23FD6D1700FC545B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CD59FDA4240C7321005B1A61 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		CDFC2F9024000017000C6D72 /* InteractiveLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractiveLabel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,6 +117,7 @@
 				CD48181123FD6D1600FC545B /* LaunchScreen.storyboard */,
 				CD48181423FD6D1600FC545B /* Info.plist */,
 				CDFC2F9024000017000C6D72 /* InteractiveLabel.swift */,
+				CD59FDA4240C7321005B1A61 /* Model.swift */,
 			);
 			path = ProjectBob;
 			sourceTree = "<group>";
@@ -270,6 +273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD59FDA5240C7321005B1A61 /* Model.swift in Sources */,
 				CD48180923FD6D1300FC545B /* GameScene.swift in Sources */,
 				CD48180B23FD6D1300FC545B /* GameViewController.swift in Sources */,
 				CD48180323FD6D1300FC545B /* AppDelegate.swift in Sources */,
